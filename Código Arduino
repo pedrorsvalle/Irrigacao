@@ -15,12 +15,13 @@ digitalWrite(pino5V, HIGH); // Põem o pino5V em estado Alto = 5V
 void loop() {
 ValAnalogIn = analogRead(pinoAnalog); // Relaciona o valor analógico com o recebido do sensor
 int Porcento = map(ValAnalogIn, 0,4095,0, 100); // Relaciona o valor analógico à porcentagem
+
  
 Serial.print(Porcento); // Imprime o valor em Porcento no monitor Serial
 Serial.println("%\n\n"); // Imprime o símbolo junto ao valor encontrado
 
 Serial.print(ValAnalogIn); // Imprime o valor em Porcento no monitor Serial
-if (Porcento <= 45) { // Se a porcentagem for menor ou igual à
+if (Porcento <= 50) { // Se a porcentagem for menor ou igual à
 Serial.println("Irrigando a planta ..."); // Imprime a frase no monitor serial
 digitalWrite(pinoRele, HIGH); // Altera o estado do pinoRele para nível Alto
 }
