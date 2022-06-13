@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html> Projeto Irrigaçao <body>
+<?php
+
+
+$servername = "files.000webhost.com";
+
+
+// REPLACE with your Database name
+$dbname = "id19099351_projeto";
+// REPLACE with Database user
+$username = "id19099351_pedro";
+// REPLACE with Database user password
+$password = "Pedroprojeto#2022";
+
+// Create connection
+$conn= new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} 
+
+$sql = "SELECT id,porcentagem,umidade, value1, value2 FROM SensorData ORDER BY id DESC";
+
+echo '<table cellspacing="5" cellpadding="5">
+      <tr> 
+        <td>ID</td> 
+        <td>porcentagem</td> 
+        <td>umidade</td>
+        <td>Value 1</td> 
+        <td>Value 2</td>
+        
+      </tr>';
+ 
+if ($result = $conn->query($sql)) {
+    while ($row = $result->fetch_assoc()) {
+        $row_id = $row["id"];
+        $row_sensor = $row["porcentagem"];
+        $row_location = $row["umidade"];
+        $row_value1 = $row["value1"];
+        $row_value2 = $row["value2"]; 
+        
+        
+      
+        echo '<tr> 
+                <td>' . $row_id . '</td> 
+                <td>' . $row_porcentagemr . '</td> 
+                <td>' . $row_umidade . '</td> 
+                <td>' . $row_value1 . '</td> 
+                <td>' . $row_value2 . '</td>
+                
+              </tr>';
+    }
+    $result->free();
+}
+
+$conn->close();
+?> 
+</table>
+</body>
+</html>
+__________________________________________________________________________________________________________
+
+
+<?php
+
+
+$servername = "files.000webhost.com";
+
+// REPLACE with your Database name
+$dbname = "id19099351_projeto";
+// REPLACE with Database user
+$username = "id19099351_pedro";
+// REPLACE with Database user password
+$password = "Pedroprojeto#2022";
+
+// Keep this API Key value to be compatible with the ESP32 code provided in the project page. 
+// If you change this value, the ESP32 sketch needs to match
+
+$api_key_value = "tPmAT5Ab3j7F9";
+
+
+$api_key=  $porcentagem = $umidade = $value1 = $value2 = "";
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+     $api_key = test_input($_POST["api_key"]);
+    if($api_key == $api_key_value) {
+        $porcentagem = test_input($_POST["porcentagem"]);
+        $umidade = test_input($_POST["umidade"]);
+        $value1 = test_input($_POST["value1"]);
+        $value2 = test_input($_POST["value2"]);
+        
+        
+        // Create connection
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        // Check connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        } 
+        
+        $sql = "INSERT INTO SensorData (porcentagem, umidade, value1, value2)
+        VALUES ('" . $porcentagem . "', '" . $umidade . "', '" . $value1 . "', '" . $value2 . "')";
+        
+        if ($conn->query($sql) === TRUE) {
+            echo "New record created successfully";
+        } 
+        else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    
+      $conn->close();
+    }
+    else {
+        echo "Wrong API Key provided.";
+    }
+
+}
+else {
+    echo "No data posted with HTTP POST.";
+}
+
+function test_input($data) {
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    return $data;
+}
+
+
