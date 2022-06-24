@@ -1,10 +1,26 @@
 
+Criação da Tabela:
+
+CREATE TABLE SensorData (
+    id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    porcentagem VARCHAR(30) NOT NULL,
+    umidade VARCHAR(30) NOT NULL,
+    value1 VARCHAR(10),
+    value2 VARCHAR(10)
+)
+_________________________________________________________________________________________________________________________________________________________
+
+
+
+----->index.php
+
+
+
 <!DOCTYPE html>
-<html> Projeto Irrigaçao <body>
+<html> Projeto Irrigação <body>
 <?php
 
-
-$servername = "files.000webhost.com";
+$servername = "localhost";
 
 
 // REPLACE with your Database name
@@ -12,7 +28,7 @@ $dbname = "id19099351_projeto";
 // REPLACE with Database user
 $username = "id19099351_pedro";
 // REPLACE with Database user password
-$password = "Pedroprojeto#2022";
+$password = "ZEJ=v8R5/H?ua]/w";
 
 // Create connection
 $conn= new mysqli($servername, $username, $password, $dbname);
@@ -21,14 +37,14 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
 
-$sql = "SELECT id,porcentagem,umidade, value1, value2 FROM SensorData ORDER BY id DESC";
+$sql = "SELECT id,porcentagem,umidade,value1, value2 FROM SensorData ORDER BY id DESC";
 
 echo '<table cellspacing="5" cellpadding="5">
       <tr> 
         <td>ID</td> 
         <td>porcentagem</td> 
         <td>umidade</td>
-        <td>Value 1</td> 
+        <td>value1</td> 
         <td>Value 2</td>
         
       </tr>';
@@ -36,8 +52,8 @@ echo '<table cellspacing="5" cellpadding="5">
 if ($result = $conn->query($sql)) {
     while ($row = $result->fetch_assoc()) {
         $row_id = $row["id"];
-        $row_sensor = $row["porcentagem"];
-        $row_location = $row["umidade"];
+        $row_porcentagem = $row["porcentagem"];
+        $row_umidade = $row["umidade"];
         $row_value1 = $row["value1"];
         $row_value2 = $row["value2"]; 
         
@@ -45,8 +61,8 @@ if ($result = $conn->query($sql)) {
       
         echo '<tr> 
                 <td>' . $row_id . '</td> 
-                <td>' . $row_porcentagemr . '</td> 
-                <td>' . $row_umidade . '</td> 
+                <td>' . $row_porcentagem . '</td> 
+                <td>' . $row_umidade. '</td> 
                 <td>' . $row_value1 . '</td> 
                 <td>' . $row_value2 . '</td>
                 
@@ -60,20 +76,24 @@ $conn->close();
 </table>
 </body>
 </html>
-__________________________________________________________________________________________________________
+
+_________________________________________________________________________________________________________________________________________________________
+
+----->post-esp-data.php
 
 
 <?php
 
+$servername = "localhost";
 
-$servername = "files.000webhost.com";
 
 // REPLACE with your Database name
 $dbname = "id19099351_projeto";
 // REPLACE with Database user
 $username = "id19099351_pedro";
 // REPLACE with Database user password
-$password = "Pedroprojeto#2022";
+$password = "ZEJ=v8R5/H?ua]/w";
+
 
 // Keep this API Key value to be compatible with the ESP32 code provided in the project page. 
 // If you change this value, the ESP32 sketch needs to match
@@ -100,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Connection failed: " . $conn->connect_error);
         } 
         
-        $sql = "INSERT INTO SensorData (porcentagem, umidade, value1, value2)
+        $sql = "INSERT INTO SensorData (porcentagem, umidade,value1, value2)
         VALUES ('" . $porcentagem . "', '" . $umidade . "', '" . $value1 . "', '" . $value2 . "')";
         
         if ($conn->query($sql) === TRUE) {
@@ -127,4 +147,7 @@ function test_input($data) {
     $data = htmlspecialchars($data);
     return $data;
 }
+
+
+
 
