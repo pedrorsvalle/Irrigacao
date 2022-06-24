@@ -1,0 +1,110 @@
+
+#include <WiFi.h>
+#include <HTTPClient.h>
+#define VALOR_MINIMO_SECO 0
+#define VALOR_MAXIMO_SECO 10
+#define VALOR_MAXIMO_UMIDO 35
+
+
+const char* serverName = "http://projirrigacao.000webhostapp.com/post-esp-data.php";
+String httpRequestData;
+const char* ssid = "Teste";
+const char* password = "12345678";
+String api_key_value = "tPmAT5Ab3j7F9";
+String value1 = "";
+String value2 = "";
+String estadosUmidade;
+
+#define pinoAnalog 35 // Define o pino A0 como "pinoAnalog"
+#define pinoRele 12 // Define o pino 8 como "pinoRele"
+#define pino5V 14 // Define o pino 7 como "pino5V"
+
+int ValAnalogIn; // Introduz o valor analógico ao código
+void setup() {
+  Serial.begin(115200); // Declara o BaundRate em 9600
+  pinMode(pinoAnalog, INPUT);
+  pinMode(pinoRele, OUTPUT); // pinoRele como Saída
+  pinMode(pino5V, OUTPUT); // Declara o pino5V como Saída
+  digitalWrite(pino5V, HIGH); // Põem o pino5V em estado Alto = 5V
+
+  WiFi.begin(ssid, password);
+  Serial.println("Status: Conectando");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.macAddress());
+}
+
+
+
+
+
+void loop()
+{
+  ValAnalogIn = analogRead(pinoAnalog); // Relaciona o valor analógico com o recebido do sensor
+  int Porcento = map(ValAnalogIn, 0, 4095, 0, 100); // Relaciona o valor analógico à porcentagem
+  Porcento = abs(Porcento - 100);
+  Serial.println("Umidade: " + String(Porcento) + "%\n"); // Imprime o valor em Porcento no monitor Serial
+
+  //Serial.println("Valor de tensão no pino do sensor: " + String(ValAnalogIn) + "mV\n"); // Imprime o valor em Porcento no monitor Serial
+  if ((Porcento >= VALOR_MINIMO_SECO) && (Porcento <= VALOR_MAXIMO_SECO))
+  { // Se a porcentagem for menor ou igual à
+    Serial.println("Status: Solo Seco"); // Imprime a frase no monitor serial
+    Serial.println("Status: Irrigando a planta ...\n"); // Imprime a frase no monitor serial
+    digitalWrite(pinoRele, LOW); // Altera o estado do pinoRele para nível Alto
+    estadosUmidade = "Seco";
+  }
+  else if ((Porcento > VALOR_MAXIMO_SECO) && (Porcento <= VALOR_MAXIMO_UMIDO))
+  { // Se não ...
+    Serial.println("Status: Solo Úmido"); // Imprime a frase no monitor serial
+    Serial.println("Status: Planta Irrigada ...\n"); // Imprime a frase no monitor serial
+    digitalWrite(pinoRele, HIGH); // Altera o estado do pinoRele para nível Baixo
+    estadosUmidade = "Úmido";
+  }
+  else if (Porcento > VALOR_MAXIMO_UMIDO)
+  {
+    Serial.println("Status: Solo Molhado"); // Imprime a frase no monitor serial
+    Serial.println("Status: Planta Encharcada ...\n"); // Imprime a frase no monitor serial
+    digitalWrite(pinoRele, HIGH); // Altera o estado do pinoRele para nível Baixo
+    estadosUmidade = "Molhado";
+  }
+  delay (1000); // Estabelece o tempo de 1s para reinicializar a leitura
+
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    HTTPClient http;
+
+    // Your Domain name with URL path or IP address with path
+    http.begin(serverName);
+
+    // Specify content-type header
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    // Prepare your HTTP POST request data
+    String httpRequestData = "api_key=" + api_key_value + "&umidade=" + String(estadosUmidade) + "&porcentagem=" + String(Porcento) + "&value1=" + value1 + "&value2=" + value2;
+    //Serial.print("httpRequestData: ");
+    //Serial.println(httpRequestData);
+    // Send HTTP POST request
+    int httpResponseCode = http.POST(httpRequestData);
+
+    if (httpResponseCode > 0)
+    {
+      //Serial.print("HTTP Response code: ");
+      //Serial.println(httpResponseCode);
+    }
+    else
+    {
+      //Serial.print("Error code: ");
+      //Serial.println(httpResponseCode);
+    }
+    // Free resources
+    http.end();
+  }
+  else {
+    Serial.println("Status: WiFi Disconnected");
+  }
+}
